@@ -7,8 +7,9 @@ public class PlayerAnimation : MonoBehaviour
 {
     [SerializeField] Rigidbody2D rb;
     [SerializeField] PlayerMovement player;
-    [SerializeField] Animator animator;
-    [SerializeField] SpriteRenderer sprite;
+    Animator animator;
+    SpriteRenderer sprite;
+    [SerializeField] AudioSource death_audio;
     
     // Currently Unused:
 
@@ -19,32 +20,19 @@ public class PlayerAnimation : MonoBehaviour
 
 
     void Start() {
+        rb = gameObject.GetComponent<Rigidbody2D>();
+        player = gameObject.GetComponent<PlayerMovement>();
+        animator = gameObject.GetComponent<Animator>();
+        sprite = gameObject.GetComponent<SpriteRenderer>();
+
+
         player.on_jump += OnJump;
-        PlayerMovement.on_death += OnDeath;
+        PlayerMovement.instance.on_death += OnDeath;
         player.on_respawn += OnRespawn;
     }
 
     void Update()
     {
-        // if(Input.GetKeyDown(KeyCode.Alpha1)) {
-        //     animator.SetTrigger("Hurt");
-        // }
-        // else 
-        // if(Input.GetKeyDown(KeyCode.Alpha2)) {
-        //     player.Die();
-        // }
-        // else if(Input.GetKeyDown(KeyCode.Alpha3)) {
-        //     player.Respawn();
-        // }
-        // else if(Input.GetKeyDown(KeyCode.Alpha4)) {
-        //     animator.SetTrigger("Attack");
-        // }
-        // else if(Input.GetKeyDown(KeyCode.Alpha5)) {
-        //     idle_anim = 1;
-        // }
-        // else if(Input.GetKeyDown(KeyCode.Alpha6)) {
-        //     idle_anim = 0;
-        // }
 
         if(!player.alive) {
             return;
@@ -75,9 +63,11 @@ public class PlayerAnimation : MonoBehaviour
         // Flipping Character
         if(rb.velocity.x > 0.1f) {
                 sprite.flipX = true;
+                player.left_facing = false;
             } 
         else if(rb.velocity.x < -0.1f) {
             sprite.flipX = false;
+            player.left_facing = true;
         }
 
     }
@@ -87,6 +77,7 @@ public class PlayerAnimation : MonoBehaviour
     }
 
     private void OnDeath() {
+        death_audio.Play();
         animator.SetTrigger("Death");
     }
 

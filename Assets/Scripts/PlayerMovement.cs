@@ -1,19 +1,21 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Player Components")]
-    [SerializeField] Rigidbody2D rb;
+    public Rigidbody2D rb;
     [SerializeField] PlayerCheckpointHandler checkpoint_handler;
     [SerializeField] AudioSource player_audio;
     [SerializeField] ParticleSystem particles;
-
+    public static PlayerMovement instance;
     public bool alive = true;
 
     [Header("Movement")]
     private Vector2 movement;
     [SerializeField] float movement_speed, acceleration, deceleration;
     Vector2 target_velocity;
+    public bool left_facing = false;
 
     [Header("Max Velocities")]
     [SerializeField] float max_fall_speed;
@@ -34,9 +36,19 @@ public class PlayerMovement : MonoBehaviour
     public OnJump on_jump;
 
     public delegate void OnDeath();
-    public static OnDeath on_death;
+    public OnDeath on_death;
     public delegate void OnRespawn();
     public OnDeath on_respawn;
+
+    void Awake()
+    {
+        if(instance == null) {
+            instance = this;
+        } else {
+            Destroy(instance.gameObject);
+            instance = this;
+        }
+    }
 
     void Update()
     {
@@ -45,11 +57,10 @@ public class PlayerMovement : MonoBehaviour
         HandleJump();
         ClampMovement();
 
-        // Reset to last checkpoint
-        if(Input.GetKeyDown(KeyCode.R)) {
-            Teleport(GetRecentCheckpointPos(), true);
-            Die();
-            Respawn();
+        // Reload scene
+        if(Input.GetKeyDown(KeyCode.T)) {
+            Scene current_scene = SceneManager.GetActiveScene();
+            SceneManager.LoadScene(current_scene.name);
         }
     }
 
